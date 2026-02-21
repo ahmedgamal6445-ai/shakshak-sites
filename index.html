@@ -23,8 +23,7 @@
   const CLIENT_ID = "957912087788-4p3rbs4sksuqujiaq9trc7pss5349736.apps.googleusercontent.com";
 
   // ✅ (2) سيبها زي ما هي
-  const TARGET_ORIGIN = "https://script.google.com";
-
+const TARGET_ORIGIN = "*";
   function sendToken(idToken){
     // بيرجع التوكن للموقع الأصلي (الويب أب)
     if (window.opener && !window.opener.closed) {
