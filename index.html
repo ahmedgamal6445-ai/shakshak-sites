@@ -19,34 +19,46 @@
   </div>
 
 <script>
-  // ✅ (1) حط Client ID بتاعك هنا (اللي بينتهي بـ apps.googleusercontent.com)
-  const CLIENT_ID = "957912087788-4p3rbs4sksuqujiaq9trc7pss5349736.apps.googleusercontent.com";
+const CLIENT_ID = "957912087788-4p3rbs4sksuqujiaq9trc7pss5349736.apps.googleusercontent.com";
 
-  // ✅ (2) سيبها زي ما هي
-const TARGET_ORIGIN = "*";
-  function sendToken(idToken){
-    // بيرجع التوكن للموقع الأصلي (الويب أب)
-    if (window.opener && !window.opener.closed) {
-      window.opener.postMessage({ type: "GIS_TOKEN", idToken }, TARGET_ORIGIN);
-      window.close();
-    } else {
-      document.body.innerHTML = "<div style='padding:40px;text-align:center'>تم ✅<br>اقفل الصفحة وارجع للموقع</div>";
-    }
-  }
+// 👇 رابط الويب اب بتاعك
+const WEBAPP_URL =
+"https://script.google.com/macros/s/PUT_YOUR_DEPLOYMENT_ID/exec";
 
-  window.onload = () => {
-    google.accounts.id.initialize({
-      client_id: CLIENT_ID,
-      callback: (resp) => sendToken(resp.credential),
-      auto_select: false,
-      cancel_on_tap_outside: false
+async function sendToken(idToken){
+
+  try{
+    const res = await fetch(WEBAPP_URL + "?action=googleLogin",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({ token:idToken })
     });
 
-    google.accounts.id.renderButton(
-      document.getElementById("gbtn"),
-      { theme:"outline", size:"large", shape:"pill", text:"continue_with", locale:"ar", width:320 }
-    );
-  };
+    const data = await res.json();
+
+    if(data.success){
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.location.href = WEBAPP_URL; // رجوع للموقع
+    }else{
+      alert("فشل تسجيل الدخول");
+    }
+
+  }catch(e){
+    alert("خطأ اتصال");
+  }
+}
+
+window.onload = () => {
+  google.accounts.id.initialize({
+    client_id: CLIENT_ID,
+    callback: (resp)=> sendToken(resp.credential),
+  });
+
+  google.accounts.id.renderButton(
+    document.getElementById("gbtn"),
+    { theme:"outline", size:"large", width:320 }
+  );
+};
 </script>
-</body>
-</html>
