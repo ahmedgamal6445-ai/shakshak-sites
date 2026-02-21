@@ -40,49 +40,20 @@
 <script>
   const CLIENT_ID = "957912087788-4p3rbs4sksuqujiaq9trc7pss5349736.apps.googleusercontent.com";
 
-  // ✅ هنستقبل origin من اللينك: ?origin=https://script.google.com
+  // هنستقبل origin من اللينك: ?origin=https://script.google.com
   const params = new URLSearchParams(location.search);
-  const requestedOrigin = (params.get("origin") || "").trim();
-
-  // ✅ أمان: اسمح بس بأصول معروفة (تقدر تزود عليهم لو عندك دومين خاص بعدين)
-  const ALLOWED_TARGETS = new Set([
-    "https://script.google.com",
-    "https://sites.google.com",
-    "https://script.googleusercontent.com"
-  ]);
-
-  // لو origin مش مسموح به، هنقفلها على https://script.google.com
-  const TARGET_ORIGIN = ALLOWED_TARGETS.has(requestedOrigin) ? requestedOrigin : "https://script.google.com";
+  const TARGET_ORIGIN = params.get("origin") || "https://script.google.com";
 
   function sendToken(idToken){
-    try{
-      if (window.opener && !window.opener.closed) {
-        window.opener.postMessage({ type: "GIS_TOKEN", idToken }, TARGET_ORIGIN);
-        window.close();
-      } else {
-        document.body.innerHTML = "<div style='padding:40px;text-align:center'>تم ✅<br>اقفل الصفحة وارجع للموقع</div>";
-      }
-    }catch(e){
-      document.body.innerHTML = "<div style='padding:40px;text-align:center'>حصل خطأ أثناء الرجوع للموقع ❌<br>اقفل الصفحة وحاول تاني</div>";
-    }
-  }
-
-  function forceChooseAccount(){
-    // ✅ يمنع auto select ويجبر اختيار الحساب
-    if (window.google && google.accounts && google.accounts.id) {
-      google.accounts.id.disableAutoSelect();
-      // إعادة تهيئة الزر بعد إلغاء auto select
-      google.accounts.id.renderButton(
-        document.getElementById("gbtn"),
-        { theme:"outline", size:"large", shape:"pill", text:"continue_with", locale:"ar", width:320 }
-      );
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage({ type: "GIS_TOKEN", idToken }, TARGET_ORIGIN);
+      window.close();
+    } else {
+      document.body.innerHTML = "<div style='padding:40px;text-align:center'>تم ✅<br>اقفل الصفحة وارجع للموقع</div>";
     }
   }
 
   window.onload = () => {
-    // ✅ أهم سطر: يمنع التثبيت على آخر حساب تلقائيًا
-    google.accounts.id.disableAutoSelect();
-
     google.accounts.id.initialize({
       client_id: CLIENT_ID,
       callback: (resp) => sendToken(resp.credential),
@@ -94,8 +65,6 @@
       document.getElementById("gbtn"),
       { theme:"outline", size:"large", shape:"pill", text:"continue_with", locale:"ar", width:320 }
     );
-
-    document.getElementById("chooseAnotherBtn").addEventListener("click", forceChooseAccount);
   };
 </script>
 </body>
