@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body{font-family:Arial;display:flex;min-height:100vh;align-items:center;justify-content:center;background:#0b0f14;color:#fff}
+    .card{background:#121826;border:1px solid #223; border-radius:16px; padding:24px; width:min(420px,92vw); text-align:center}
+    .hint{opacity:.8;margin:10px 0 18px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>تسجيل الدخول بجوجل</h2>
+    <div class="hint">اضغط للتسجيل… وسيتم الرجوع للموقع تلقائيًا</div>
+    <div id="gbtn"></div>
+  </div>
+
+<script>
+  // ✅ 1) حط Client ID بتاعك هنا
+  const CLIENT_ID = "PASTE_YOUR_CLIENT_ID.apps.googleusercontent.com";
+
+  // ✅ 2) ده لينك الويب آب بتاعك
+  const TARGET_ORIGIN = "https://script.google.com";
+
+  function sendTokenToOpener(idToken){
+    try{
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({ type: "GIS_TOKEN", idToken }, TARGET_ORIGIN);
+        window.close();
+      } else {
+        // fallback لو اتفتح في tab مش popup
+        // بنحفظه مؤقتًا وبنقوله يرجع للموقع
+        localStorage.setItem("GIS_TOKEN_TMP", idToken);
+        document.body.innerHTML = "<div style='color:#fff;font-family:Arial;text-align:center;padding:40px'>تم تسجيل الدخول ✅<br/>ارجع للموقع وأعد المحاولة</div>";
+      }
+    }catch(e){
+      console.error(e);
+    }
+  }
+
+  window.onload = () => {
+    google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: (resp) => sendTokenToOpener(resp.credential),
+      auto_select: false,
+      cancel_on_tap_outside: false
+    });
+
+    google.accounts.id.renderButton(
+      document.getElementById("gbtn"),
+      { theme:"outline", size:"large", shape:"pill", text:"continue_with", locale:"ar", width:320 }
+    );
+  };
+</script>
+</body>
+</html>
