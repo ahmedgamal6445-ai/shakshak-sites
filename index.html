@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sign in</title>
+  <title>Shakshak - Google Login</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     body{font-family:Arial;display:flex;min-height:100vh;align-items:center;justify-content:center;background:#0b0f14;color:#fff}
@@ -19,32 +19,26 @@
   </div>
 
 <script>
-  // ✅ 1) حط Client ID بتاعك هنا
+  // ✅ (1) حط Client ID بتاعك هنا (اللي بينتهي بـ apps.googleusercontent.com)
   const CLIENT_ID = "957912087788-4p3rbs4sksuqujiaq9trc7pss5349736.apps.googleusercontent.com";
 
-  // ✅ 2) ده لينك الويب آب بتاعك
+  // ✅ (2) سيبها زي ما هي
   const TARGET_ORIGIN = "https://script.google.com";
 
-  function sendTokenToOpener(idToken){
-    try{
-      if (window.opener && !window.opener.closed) {
-        window.opener.postMessage({ type: "GIS_TOKEN", idToken }, TARGET_ORIGIN);
-        window.close();
-      } else {
-        // fallback لو اتفتح في tab مش popup
-        // بنحفظه مؤقتًا وبنقوله يرجع للموقع
-        localStorage.setItem("GIS_TOKEN_TMP", idToken);
-        document.body.innerHTML = "<div style='color:#fff;font-family:Arial;text-align:center;padding:40px'>تم تسجيل الدخول ✅<br/>ارجع للموقع وأعد المحاولة</div>";
-      }
-    }catch(e){
-      console.error(e);
+  function sendToken(idToken){
+    // بيرجع التوكن للموقع الأصلي (الويب أب)
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage({ type: "GIS_TOKEN", idToken }, TARGET_ORIGIN);
+      window.close();
+    } else {
+      document.body.innerHTML = "<div style='padding:40px;text-align:center'>تم ✅<br>اقفل الصفحة وارجع للموقع</div>";
     }
   }
 
   window.onload = () => {
     google.accounts.id.initialize({
       client_id: CLIENT_ID,
-      callback: (resp) => sendTokenToOpener(resp.credential),
+      callback: (resp) => sendToken(resp.credential),
       auto_select: false,
       cancel_on_tap_outside: false
     });
